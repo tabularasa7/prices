@@ -87,7 +87,7 @@ func loopInterfacesAndPrint(value interface{}, fileNames *[]string) {
 		}
 	case string:
 		// https://www.healthonecares.com/-/media/project/hca/hut/cms-files/84-1321373_p-sl-medical-center_standardcharges.csv?rev=04cd82bc2d134e3a82c7ebbd8b942c09
-		if strings.Contains(inVal, "csv") && !slices.Contains(*fileNames, inVal) {
+		if strings.Contains(inVal, ".csv") && !slices.Contains(*fileNames, inVal) {
 			*fileNames = append(*fileNames, inVal)
 		}
 	default:
