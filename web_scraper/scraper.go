@@ -3,10 +3,8 @@ package webscraper
 import (
 	"encoding/json"
 	"fmt"
-	"slices"
+	"net/http"
 	"strings"
-
-	httpclient "hospital-prices/http_client"
 
 	"golang.org/x/net/html"
 )
@@ -14,15 +12,15 @@ import (
 func ScrapeFiles(url string) ([]string, error) {
 	csvFiles := make([]string, 0)
 
-	reader, err := httpclient.GetURL(url)
+	resp, err := http.Get(url)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer reader.Close()
+	defer resp.Body.Close()
 
-	htmlPage, err := html.Parse(reader)
+	htmlPage, err := html.Parse(resp.Body)
 
 	if err != nil {
 		return nil, err
@@ -86,8 +84,7 @@ func loopInterfacesAndPrint(value interface{}, fileNames *[]string) {
 			loopInterfacesAndPrint(val, fileNames)
 		}
 	case string:
-		// https://www.healthonecares.com/-/media/project/hca/hut/cms-files/84-1321373_p-sl-medical-center_standardcharges.csv?rev=04cd82bc2d134e3a82c7ebbd8b942c09
-		if strings.Contains(inVal, ".csv") && !slices.Contains(*fileNames, inVal) {
+		if strings.Contains(inVal, ".csv") {
 			*fileNames = append(*fileNames, inVal)
 		}
 	default:

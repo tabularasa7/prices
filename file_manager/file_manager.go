@@ -3,8 +3,8 @@ package filemanager
 import (
 	"bytes"
 	"encoding/csv"
-	httpclient "hospital-prices/http_client"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"sync"
@@ -12,13 +12,13 @@ import (
 
 func DownloadFile(fileUrl, filePath string, wait *sync.WaitGroup) error {
 	defer wait.Done()
-	body, err := httpclient.GetURL(fileUrl)
+	resp, err := http.Get(fileUrl)
 
 	if err != nil {
 		return err
 	}
 
-	defer body.Close()
+	defer resp.Body.Close()
 
 	out, err := os.Create(path.Base(filePath))
 
@@ -28,7 +28,7 @@ func DownloadFile(fileUrl, filePath string, wait *sync.WaitGroup) error {
 
 	defer out.Close()
 
-	_, err = io.Copy(out, body)
+	_, err = io.Copy(out, resp.Body)
 
 	return err
 
