@@ -31,6 +31,7 @@ func main() {
 
 	fileNames := make([]string, len(csvFiles))
 
+	// TODO: break out into separate package/method
 	for index, csv := range csvFiles {
 		wait.Add(1)
 		fmt.Println(csv)
@@ -49,6 +50,8 @@ func main() {
 	fmt.Printf("fileName: %v\n", fileNames)
 
 	wait.Wait()
+
+	// TODO: create separate method for parsing CSV files (several different column formats)
 	file, err := os.Open(fileNames[0])
 
 	if err != nil {
