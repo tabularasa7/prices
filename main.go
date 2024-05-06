@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 
@@ -27,12 +29,15 @@ func main() {
 
 	fmt.Println("CSV Files:")
 
-	for _, csv := range csvFiles {
+	fileNames := make([]string, len(csvFiles))
+
+	for index, csv := range csvFiles {
 		wait.Add(1)
 		fmt.Println(csv)
 		parseStringsSlash := strings.Split(csv, "/")
 		parseStringsQuestion := strings.Split(parseStringsSlash[7], "?")
 		fmt.Println(parseStringsQuestion[0])
+		fileNames[index] = parseStringsQuestion[0]
 
 		go filemanager.DownloadFile(hospital.Url+csv, parseStringsQuestion[0], &wait)
 
@@ -41,5 +46,24 @@ func main() {
 		}
 	}
 
+	fmt.Printf("fileName: %v\n", fileNames)
+
 	wait.Wait()
+	file, err := os.Open(fileNames[0])
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	reader := csv.NewReader(file)
+	i := 0
+	for i < 10 {
+		record, err := filemanager.Read(reader)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(record)
+		i++
+	}
 }

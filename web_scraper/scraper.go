@@ -48,8 +48,8 @@ func processHTMLNodes(node *html.Node, fileNames *[]string) {
 
 func parseTextNode(node *html.Node, csvFileNames *[]string) []string {
 	var fileNames []string
-	// check if test is json format by verifying the first character is an open curly bracket
 	switch node.Data[0] {
+	// check if node is json format by verifying the first character is an open curly bracket
 	case '{':
 		jsonMap := make(map[string]interface{})
 		json.Unmarshal([]byte(node.Data), &jsonMap)
@@ -84,6 +84,7 @@ func loopInterfacesAndPrint(value interface{}, fileNames *[]string) {
 			loopInterfacesAndPrint(val, fileNames)
 		}
 	case string:
+		// currently assuming that the only files we're looking for are csv files, eventually may need to fetch urls or json files
 		if strings.Contains(inVal, ".csv") {
 			*fileNames = append(*fileNames, inVal)
 		}
