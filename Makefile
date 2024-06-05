@@ -1,2 +1,2 @@
 build-server:
-	./tools/create-database.sh
+	mysql -h "${SQL_SERVER}" -u "root" "hospital_costs" < "./database/costs.sql"
