@@ -3,14 +3,43 @@ package filemanager
 import (
 	"bytes"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"sync"
 )
 
-func DownloadFile(fileUrl, filePath string, wait *sync.WaitGroup) error {
+func ParseFileNamesAndDownload(files []string) ([]string, error) {
+	var wait sync.WaitGroup
+	fmt.Println("Files:", files)
+
+	fileNames := make([]string, len(files))
+
+	// TODO: handle errors from Download file
+	for index, file := range files {
+		wait.Add(1)
+		fmt.Println(file)
+		parseStringsSlash := strings.Split(file, "/")
+		parseStringsQuestion := strings.Split(parseStringsSlash[6], "?")
+		parseStringsEndPunc := strings.TrimRight(parseStringsQuestion[0], ".")
+		fileNames[index] = parseStringsEndPunc + ".json"
+		fmt.Println(parseStringsEndPunc)
+
+		go DownloadFile(file, parseStringsEndPunc+".json", &wait)
+
+	}
+
+	fmt.Printf("fileName: %v\n", fileNames)
+
+	wait.Wait()
+
+	return fileNames, nil
+}
+
+func DownloadFile(fileUrl, saveFileName string, wait *sync.WaitGroup) error {
 	defer wait.Done()
 	resp, err := http.Get(fileUrl)
 
@@ -20,7 +49,7 @@ func DownloadFile(fileUrl, filePath string, wait *sync.WaitGroup) error {
 
 	defer resp.Body.Close()
 
-	out, err := os.Create(path.Base(filePath))
+	out, err := os.Create(path.Base(saveFileName))
 
 	if err != nil {
 		return err

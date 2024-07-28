@@ -6,8 +6,12 @@ import (
 	"net/http"
 	"strings"
 
+	fileparser "hospital-prices/file_parser"
+
 	"golang.org/x/net/html"
 )
+
+const TERMINATION_CLAUSE = "standardcharges"
 
 func ScrapeFiles(url string) ([]string, error) {
 	csvFiles := make([]string, 0)
@@ -54,7 +58,7 @@ func parseTextNode(node *html.Node, csvFileNames *[]string) []string {
 		jsonMap := make(map[string]interface{})
 		json.Unmarshal([]byte(node.Data), &jsonMap)
 		if baseMap, ok := jsonMap["sitecore"]; ok {
-			loopInterfacesAndPrint(baseMap, csvFileNames)
+			fileparser.LoopInterfaces(baseMap, csvFileNames, TERMINATION_CLAUSE)
 		}
 	default:
 		// do nothing
@@ -70,25 +74,5 @@ func parseElementNode(node *html.Node) {
 				fmt.Printf("attribute: %v\n\n", attribute.Val)
 			}
 		}
-	}
-}
-
-func loopInterfacesAndPrint(value interface{}, fileNames *[]string) {
-	switch inVal := value.(type) {
-	case map[string]interface{}:
-		for _, val := range inVal {
-			loopInterfacesAndPrint(val, fileNames)
-		}
-	case []interface{}:
-		for _, val := range inVal {
-			loopInterfacesAndPrint(val, fileNames)
-		}
-	case string:
-		// currently assuming that the only files we're looking for are csv files, eventually may need to fetch urls or json files
-		if strings.Contains(inVal, ".csv") {
-			*fileNames = append(*fileNames, inVal)
-		}
-	default:
-		// do nothing
 	}
 }
